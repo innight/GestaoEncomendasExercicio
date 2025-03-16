@@ -1,4 +1,5 @@
-﻿using GestaoEncomendasExercicio.Shared.Interfaces;
+﻿using System.Text.Json;
+using GestaoEncomendasExercicio.Shared.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApiTestDapper.Controllers
@@ -8,10 +9,12 @@ namespace WebApiTestDapper.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
+        private readonly ILogger<OrderController> _logger;
 
-        public OrderController(IOrderService orderService)
+        public OrderController(IOrderService orderService, ILogger<OrderController> logger)
         {
             _orderService = orderService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -27,28 +30,55 @@ namespace WebApiTestDapper.Controllers
             try
             {
                 var order = await _orderService.GetOrderByIdAsync(id);
-                if (order == null) return NotFound($"Order with ID {id} not found.");
+                if (order == null)
+                {
+                    return NotFound($"Encomenda com o ID {id} não foi encontrada.");
+                }
                 return Ok(order);
             }
             catch (Exception ex)
             {
-                // Log the error (e.g., using ILogger)
-                return StatusCode(500, "An error occurred while processing your request.");
+                _logger.LogError(ex, "Erro ao obter a encomenda com o ID {OrderId}.", id);
+                return StatusCode(500, "Ocorreu um erro ao processar o seu pedido.");
             }
         }
 
         [HttpPut("{id}/status")]
-        public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] string status)
+        public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] JsonElement statusJson)
         {
-            await _orderService.UpdateOrderStatusAsync(id, status);
-            return NoContent();
+            try
+            {
+                if (!statusJson.TryGetProperty("status", out JsonElement statusElement) ||
+                    statusElement.ValueKind != JsonValueKind.String)
+                {
+                    return BadRequest("Pedido inválido: o campo 'status' é obrigatório e deve ser uma string.");
+                }
+
+                string status = statusElement.GetString()!;
+                await _orderService.UpdateOrderStatusAsync(id, status);
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao atualizar o estado da encomenda com o ID {OrderId}.", id);
+                return StatusCode(500, $"Ocorreu um erro ao atualizar o estado: {ex.Message}");
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> CancelOrder(int id)
         {
-            await _orderService.CancelOrderAsync(id);
-            return NoContent();
+            try
+            {
+                await _orderService.CancelOrderAsync(id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao cancelar a encomenda com o ID {OrderId}.", id);
+                return StatusCode(500, "Ocorreu um erro ao cancelar a encomenda.");
+            }
         }
     }
 }

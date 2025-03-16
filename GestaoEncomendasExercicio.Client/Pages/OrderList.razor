@@ -1,0 +1,116 @@
+﻿@page "/orders"
+@using GestaoEncomendasExercicio.Client.Services
+@using GestaoEncomendasExercicio.Shared.Models
+@inject OrderService orderService
+
+<h3>Lista de Encomendas</h3>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert @(isSuccess ? "alert-success" : "alert-danger")" role="alert">
+        @message
+    </div>
+}
+
+@if (orders == null)
+{
+    <p>A carregar...</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Data</th>
+                    <th>Estado</th>
+                    <th>Atualizar Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in orders)
+                {
+                    <tr>
+                        <td>@order.Id</td>
+                        <td>@order.CustomerName</td>
+                        <td>@order.CreatedAt.ToShortDateString()</td>
+                        <td>
+                            <select class="form-select" @bind="order.Status">
+                                @foreach (var estado in availableStatus)
+                                {
+                                    <option value="@estado">@estado</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary btn-sm mt-2" @onclick="() => UpdateOrderStatus(order)">Atualizar</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger btn-sm mt-2" @onclick="() => DeleteOrder(order)">Eliminar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<Order> orders = new List<Order>();
+    private string[] availableStatus = { "Pendente", "Em preparação", "Despachada", "Entregue" };
+
+    private string? message;
+    private bool isSuccess;
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await orderService.GetAllOrdersAsync();
+    }
+
+    private async Task UpdateOrderStatus(Order order)
+    {
+        var result = await orderService.UpdateOrderStatusAsync(order.Id, order.Status);
+        if (result.IsSuccess)
+        {
+            message = "Encomenda atualizada com sucesso!";
+            isSuccess = true;
+        }
+        else
+        {
+            message = "Erro ao atualizar a encomenda: " + result.ErrorMessage;
+            isSuccess = false;
+        }
+
+        // Refresca grelha 
+        orders = await orderService.GetAllOrdersAsync();
+        StateHasChanged();
+
+        // Espera 5m antes de apagar a mensagem
+        await Task.Delay(5000);
+        message = null;
+        StateHasChanged();
+    }
+
+    private async Task DeleteOrder(Order order)
+    {
+        var result = await orderService.DeleteOrderAsync(order.Id);
+        if (result.IsSuccess)
+        {
+            message = "Encomenda eliminada com sucesso!";
+            isSuccess = true;
+            // Remove linha da encomenda sem refrescar por completo a pagina
+            orders.Remove(order);
+        }
+        else
+        {
+            message = "Erro ao eliminar a encomenda: " + result.ErrorMessage;
+            isSuccess = false;
+        }
+        StateHasChanged();
+        await Task.Delay(5000);
+        message = null;
+        StateHasChanged();
+    }
+}
