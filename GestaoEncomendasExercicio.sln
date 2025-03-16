@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestaoEncomendasExercicio.A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestaoEncomendasExercicio.Client", "GestaoEncomendasExercicio.Client\GestaoEncomendasExercicio.Client.csproj", "{B3BDE0B3-0D0E-4DC2-ADAA-FDF40385970C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestaoEncomendasExercicio.Test", "GestaoEncomendasExercicio.Test\GestaoEncomendasExercicio.Test.csproj", "{4CC0E897-2B41-45C8-9845-E6368AC4B1C6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{B3BDE0B3-0D0E-4DC2-ADAA-FDF40385970C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3BDE0B3-0D0E-4DC2-ADAA-FDF40385970C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3BDE0B3-0D0E-4DC2-ADAA-FDF40385970C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CC0E897-2B41-45C8-9845-E6368AC4B1C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CC0E897-2B41-45C8-9845-E6368AC4B1C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CC0E897-2B41-45C8-9845-E6368AC4B1C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CC0E897-2B41-45C8-9845-E6368AC4B1C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
