@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <ProjectReference Include="..\GestaoEncomendasExercicio.Shared\GestaoEncomendasExercicio.Shared.csproj" />
   </ItemGroup>
 
 </Project>
