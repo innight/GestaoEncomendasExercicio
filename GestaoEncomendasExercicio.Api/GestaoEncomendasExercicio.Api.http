@@ -1,0 +1,6 @@
+@GestaoEncomendasExercicio.Api_HostAddress = http://localhost:5147
+
+GET {{GestaoEncomendasExercicio.Api_HostAddress}}/order/
+Accept: application/json
+
+###
