@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestaoEncomendasExercicio.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestaoEncomendasExercicio.Test", "GestaoEncomendasExercicio.Test\GestaoEncomendasExercicio.Test.csproj", "{4CC0E897-2B41-45C8-9845-E6368AC4B1C6}"
 EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "GestaoEncomendasExercicio.Database", "GestaoEncomendasExercicio.Database\GestaoEncomendasExercicio.Database.sqlproj", "{A783E66D-D615-4EB0-B5EB-60D5AECE2F39}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,12 @@ Global
 		{4CC0E897-2B41-45C8-9845-E6368AC4B1C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CC0E897-2B41-45C8-9845-E6368AC4B1C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CC0E897-2B41-45C8-9845-E6368AC4B1C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A783E66D-D615-4EB0-B5EB-60D5AECE2F39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A783E66D-D615-4EB0-B5EB-60D5AECE2F39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A783E66D-D615-4EB0-B5EB-60D5AECE2F39}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{A783E66D-D615-4EB0-B5EB-60D5AECE2F39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A783E66D-D615-4EB0-B5EB-60D5AECE2F39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A783E66D-D615-4EB0-B5EB-60D5AECE2F39}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
