@@ -2,23 +2,32 @@
 @using GestaoEncomendasExercicio.Client.Services
 @using GestaoEncomendasExercicio.Shared.Models
 @inject OrderService orderService
+@inject IJSRuntime jsRuntime
+@inject NotificationService NotificationService
+@inject ILogger<OrderList> Logger
 
-<h3>Lista de Encomendas</h3>
+<h3 class="mb-4">Lista de Encomendas</h3>
 
 @if (!string.IsNullOrEmpty(message))
 {
-    <div class="alert @(isSuccess ? "alert-success" : "alert-danger")" role="alert">
+    <div class="alert alert-dismissible @(isSuccess ? "alert-success" : "alert-danger") fade show" role="alert">
         @message
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
     </div>
 }
 
 @if (orders == null)
 {
-    <p>A carregar...</p>
+    <div class="d-flex justify-content-center align-items-center mt-3">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">A carregar...</span>
+        </div>
+        <p class="ms-3 mb-0">A carregar...</p>
+    </div>
 }
 else
 {
-    <div class="table-responsive">
+    <div class="table-responsive mt-3">
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -27,6 +36,7 @@ else
                     <th>Data</th>
                     <th>Estado</th>
                     <th>Atualizar Estado</th>
+                    <th>Eliminar</th>
                 </tr>
             </thead>
             <tbody>
@@ -38,9 +48,9 @@ else
                         <td>@order.CreatedAt.ToShortDateString()</td>
                         <td>
                             <select class="form-select" @bind="order.Status">
-                                @foreach (var estado in availableStatus)
+                                @foreach (var status in availableStatus)
                                 {
-                                    <option value="@estado">@estado</option>
+                                    <option value="@status">@status</option>
                                 }
                             </select>
                         </td>
@@ -48,7 +58,7 @@ else
                             <button class="btn btn-primary btn-sm mt-2" @onclick="() => UpdateOrderStatus(order)">Atualizar</button>
                         </td>
                         <td>
-                            <button class="btn btn-danger btn-sm mt-2" @onclick="() => DeleteOrder(order)">Eliminar</button>
+                            <button class="btn btn-danger btn-sm mt-2" @onclick="() => ConfirmDeleteOrder(order)">Eliminar</button>
                         </td>
                     </tr>
                 }
@@ -58,9 +68,10 @@ else
 }
 
 @code {
-    private List<Order> orders = new List<Order>();
+    private List<Order> orders = new();
     private string[] availableStatus = { "Pendente", "Em preparação", "Despachada", "Entregue" };
 
+    // Status message variables (messages in European Portuguese)
     private string? message;
     private bool isSuccess;
 
@@ -71,46 +82,55 @@ else
 
     private async Task UpdateOrderStatus(Order order)
     {
-        var result = await orderService.UpdateOrderStatusAsync(order.Id, order.Status);
-        if (result.IsSuccess)
+
+        try
         {
-            message = "Encomenda atualizada com sucesso!";
-            isSuccess = true;
+            var result = await orderService.UpdateOrderStatusAsync(order.Id, order.Status);
+            if (result.IsSuccess)
+                await NotificationService.ShowSuccess("Encomenda atualizada com sucesso!");
+            else
+                await NotificationService.ShowError($"Erro ao atualizar a encomenda: {result.ErrorMessage}");
         }
-        else
+        catch (Exception ex)
         {
-            message = "Erro ao atualizar a encomenda: " + result.ErrorMessage;
-            isSuccess = false;
+            Logger.LogError(ex, "Erro ao atualizar a encomenda");
+            await NotificationService.ShowError("Erro interno ao atualizar a encomenda.");
         }
 
-        // Refresca grelha 
         orders = await orderService.GetAllOrdersAsync();
         StateHasChanged();
+    }
 
-        // Espera 5m antes de apagar a mensagem
-        await Task.Delay(5000);
-        message = null;
-        StateHasChanged();
+    private async Task ConfirmDeleteOrder(Order order)
+    {
+        bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm", "Tem a certeza que deseja eliminar esta encomenda?");
+        if (confirmed)
+        {
+            await DeleteOrder(order);
+        }
     }
 
     private async Task DeleteOrder(Order order)
     {
-        var result = await orderService.DeleteOrderAsync(order.Id);
-        if (result.IsSuccess)
+        try
         {
-            message = "Encomenda eliminada com sucesso!";
-            isSuccess = true;
-            // Remove linha da encomenda sem refrescar por completo a pagina
-            orders.Remove(order);
+            var result = await orderService.DeleteOrderAsync(order.Id);
+            if (result.IsSuccess)
+            {
+                orders.Remove(order);
+                await NotificationService.ShowSuccess("Encomenda eliminada com sucesso!");
+            }
+            else
+            {
+                Logger.LogWarning("Erro ao eliminar a encomenda: {Error}", result.ErrorMessage);
+                await NotificationService.ShowError("Erro ao eliminar a encomenda: " + result.ErrorMessage);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            message = "Erro ao eliminar a encomenda: " + result.ErrorMessage;
-            isSuccess = false;
+            Logger.LogError(ex, "Erro ao eliminar encomenda");
+            await NotificationService.ShowError("Erro interno ao eliminar a encomenda.");
         }
-        StateHasChanged();
-        await Task.Delay(5000);
-        message = null;
         StateHasChanged();
     }
 }

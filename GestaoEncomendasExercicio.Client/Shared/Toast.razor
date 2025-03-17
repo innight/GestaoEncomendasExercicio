@@ -1,0 +1,42 @@
+﻿@using GestaoEncomendasExercicio.Client.Services
+@inject NotificationService NotificationService
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    @if (!string.IsNullOrEmpty(CurrentMessage))
+    {
+        <div class="toast show align-items-center text-white @(IsSuccess ? "bg-success" : "bg-danger") border-0">
+            <div class="d-flex">
+                <div class="toast-body">@CurrentMessage</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                        aria-label="Fechar"
+                        @onclick="ClearMessage"></button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string? CurrentMessage;
+    private bool IsSuccess;
+
+    protected override void OnInitialized()
+    {
+        NotificationService.OnNotify += DisplayNotification;
+    }
+
+    private async Task DisplayNotification(NotificationMessage notification)
+    {
+        CurrentMessage = notification.Message;
+        IsSuccess = notification.IsSuccess;
+        StateHasChanged();
+
+        await Task.Delay(notification.Duration);
+        ClearMessage();
+    }
+
+    private void ClearMessage()
+    {
+        CurrentMessage = null;
+        StateHasChanged();
+    }
+}
